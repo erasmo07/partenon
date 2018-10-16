@@ -1,7 +1,7 @@
 import random
 import string
 from oraculo.gods import faveo
-from partenon.helpdesk import HelpDeskUser, Topic, Priority
+from partenon.helpdesk import HelpDeskUser, Topic, Priority, Status
 
 
 def generate_random_strin(length):
@@ -10,7 +10,6 @@ def generate_random_strin(length):
 
 
 def test_can_create_user():
-    client = faveo.APIClient()
     email = "%s@example.com" % generate_random_strin(4)
     body = {'email': email, 'first_name': 'test', 'last_name': 'test'}
     user = HelpDeskUser.create_user(**body)
@@ -88,10 +87,9 @@ def test_can_search_user_by_email():
     email = "%s@example.com" % generate_random_strin(4)
     body = {'email': email, 'first_name': 'test', 'last_name': 'test'}
 
-    import ipdb; ipdb.set_trace()
     HelpDeskUser.create_user(**body)
     user = HelpDeskUser.get(email)
-    
+
     user_keys = [
         'updated_at', 'email', 'first_name',
         'mobile', 'id', 'user_name', 'email_verify',
@@ -99,3 +97,53 @@ def test_can_search_user_by_email():
         'last_name']
     for key in user_keys:
         assert(hasattr(user, key))
+
+
+def test_can_search_status():
+    status = Status.get_entitys()
+
+    for state in status:
+        assert(hasattr(state, 'id'))
+        assert(hasattr(state, 'name'))
+
+def test_can_search_status_by_name():
+    state_open = Status.get_state_by_name('Open')
+
+    assert(hasattr(state_open, 'id'))
+    assert(hasattr(state_open, 'name'))
+    assert(state_open.name == 'Open')
+
+def test_can_close_a_ticket():
+    email = "%s@example.com" % generate_random_strin(4)
+    body = {'email': email, 'first_name': 'test', 'last_name': 'test'}
+
+    user = HelpDeskUser.create_user(**body)
+
+    subject = generate_random_strin(60)
+    body = generate_random_strin(150)
+    priority = Priority(**dict(id=2))
+    topic = Topic(**dict(id=40))
+
+    body = dict(subject=subject, body=body, priority=priority, topic=topic)
+    ticket = user.ticket.create(**body)
+
+    ticket.close()
+
+def test_can_change_status_ticket():
+    email = "%s@example.com" % generate_random_strin(4)
+    body = {'email': email, 'first_name': 'test', 'last_name': 'test'}
+
+    user = HelpDeskUser.create_user(**body)
+
+    subject = generate_random_strin(60)
+    body = generate_random_strin(150)
+    priority = Priority(**dict(id=2))
+    topic = Topic(**dict(id=40))
+
+    body = dict(subject=subject, body=body, priority=priority, topic=topic)
+    ticket = user.ticket.create(**body)
+
+    state_resolve = Status.get_state_by_name('Resolved')
+
+    ticket.change_state(state_resolve)
+    assert(ticket.state.name == 'Resolved')    
