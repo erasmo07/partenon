@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """The setup script."""
-
+import sys
 from setuptools import setup, find_packages
 
 with open('README.rst') as readme_file:
@@ -11,11 +11,16 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ ]
+requirements = ['requests', 'pytest-runner']
 
-setup_requirements = ['pytest-runner', ]
+needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
+pytest_runner = ['pytest-runner'] if needs_pytest else []
 
-test_requirements = ['pytest', ]
+setup_requirements = [
+    # other setup requirements
+    ] + pytest_runner
+
+test_requirements = ['pytest']
 
 setup(
     author="Erasmo Montes",
