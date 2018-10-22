@@ -1,7 +1,8 @@
 from .helpdesk import (
-    HelpDesk, HelpDeskUser, Topic, Priority,
-    Status)
+    HelpDesk, HelpDeskUser, Topics, Prioritys,
+    Status, Topic, Priority)
 
 __all__ = [
     'HelpDesk', 'HelpDeskUser',
-    'Topic', 'Priority', 'Status']
+    'Topics', 'Prioritys', 'Status',
+    'Topic', 'Priority']

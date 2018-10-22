@@ -38,18 +38,35 @@ class State(BaseEntityHelpDesk):
 
 
 class HelpDeskGetEntity(BaseHelpDesk):
-    _url = None
-    _entity = None
+    def __init__(self, url, entity, key_name='name'):
+        self._url = url 
+        self._entity = entity 
+        self._client = APIClient()
+        self._key_name = key_name
 
-    @staticmethod
     def get_entitys(self):
         response = self._client.get(self._url)
         return map(self._entity, response.get('result'))
+    
+    def get_by_name(self, name):
+        response = self._client.get(self._url, {'name': name})
+        for item in response.get('result'):
+            if item[self._key_name] == name:
+                return self._entity(**item)
+        else:
+            raise DoesNotExist('Not exists %s ' % name)
 
 
-class Topics(HelpDeskGetEntity):
+class Prioritys(object):
+    _url = 'api/v1/helpdesk/priority'
+    _entity = Priority
+    objects = HelpDeskGetEntity(_url, _entity, key_name='priority')
+
+
+class Topics(object):
     _url = 'api/v1/helpdesk/help-topic'
     _entity = Topic
+    objects = HelpDeskGetEntity(_url, _entity, key_name='topic')
 
 
 class Status(HelpDeskGetEntity):
@@ -79,7 +96,7 @@ class Status(HelpDeskGetEntity):
                 return State(**state)
         else:
             raise DoesNotExist('Not exists Status %s ' % name)
-    
+
 
 class HelpDeskTicket(BaseEntityHelpDesk, BaseHelpDesk):
     _user = None
@@ -101,8 +118,8 @@ class HelpDeskTicket(BaseEntityHelpDesk, BaseHelpDesk):
     def create(self, subject, body, priority, topic):
         body = dict(
             subject=subject, body=body, first_name=self._user.first_name,
-            email=self._user.email, priority=priority.id, help_topic=topic.id,
-            dept=self._department)
+            email=self._user.email, priority=priority.priority_id,
+            help_topic=topic.id, dept=self._department)
 
         response = self._client.post(self._create_url, body).get('response')
         return HelpDeskTicket(**response)
