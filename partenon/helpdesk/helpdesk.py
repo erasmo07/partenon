@@ -1,22 +1,27 @@
 import os
-from oraculo.gods.faveo import APIClient
+from oraculo.gods import faveo, faveo_db
 
 
 class DoesNotExist(Exception):
     pass
 
+
 class NotSetHelpDeskUserInstance(Exception):
+    pass
+
+
+class NotIsInstance(Exception):
     pass
 
 
 class BaseHelpDesk(object):
 
     def __init__(self):
-        self._client = APIClient()
+        self._client = faveo.APIClient()
 
 
 class BaseEntityHelpDesk(object):
-
+    
     def __init__(self, *args, **kwargs):
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -41,7 +46,7 @@ class HelpDeskGetEntity(BaseHelpDesk):
     def __init__(self, url, entity, key_name='name'):
         self._url = url 
         self._entity = entity 
-        self._client = APIClient()
+        self._client = faveo.APIClient()
         self._key_name = key_name
 
     def get_entitys(self):
@@ -72,11 +77,11 @@ class Topics(object):
 class Status(HelpDeskGetEntity):
     _url = 'api/v1/helpdesk/dependency'
     _entity = State
-    _client = APIClient()
+    _client = faveo.APIClient()
 
     @staticmethod
     def get_entitys(
-            client=APIClient(),
+            client=faveo.APIClient(),
             url='api/v1/helpdesk/dependency',
             entity=State):
         response = client.get(url)
@@ -86,7 +91,7 @@ class Status(HelpDeskGetEntity):
     @staticmethod
     def get_state_by_name(
             name,
-            client=APIClient(),
+            client=faveo.APIClient(),
             url='api/v1/helpdesk/dependency',
             entity=State):
         response = client.get(url)
@@ -100,22 +105,28 @@ class Status(HelpDeskGetEntity):
 
 class HelpDeskTicket(BaseEntityHelpDesk, BaseHelpDesk):
     _user = None
-    _client = APIClient()
+    _client = faveo.APIClient()
     _status_close_name = 'Closed'
     _department = os.environ.get('PARTENON_DEPARTMENT')
     _create_url = 'api/v1/helpdesk/create'
     _list_url = 'api/v1/helpdesk/my-tickets-user'
     _url_detail = 'api/v1/helpdesk/ticket'
     _url_to_change_status = 'api/v2/helpdesk/status/change'
-    
+
     @property
     def state(self):
         response = self._client.get(
             self._url_detail, params=dict(id=self.ticket_id))
-        ticket = response.get('data').get('ticket') 
+        ticket = response.get('data').get('ticket')
         return Status.get_state_by_name(ticket.get('status_name'))
 
     def create(self, subject, body, priority, topic):
+        if not isinstance(priority, Priority):
+            raise NotIsInstance('Priority not is instance of Priority')
+        
+        if not isinstance(topic, Topic):
+            raise NotIsInstance('Topic not is instance of Topic')
+
         body = dict(
             subject=subject, body=body, first_name=self._user.first_name,
             email=self._user.email, priority=priority.priority_id,
@@ -131,7 +142,7 @@ class HelpDeskTicket(BaseEntityHelpDesk, BaseHelpDesk):
         params = dict(user_id=self._user.id)
         response = self._client.get(self._list_url, params)
         return [HelpDeskTicket(**ticket) for ticket in response.get('tickets')]
-    
+
     def change_state(self, state):
         body = dict(ticket_id=self.ticket_id, status_id=state.id)
         response = self._client.post(self._url_to_change_status, body)
@@ -154,16 +165,21 @@ class HelpDeskUser(BaseEntityHelpDesk, BaseHelpDesk):
 
     @staticmethod
     def get(email,
-            url='api/v1/helpdesk/agents',
-            client=APIClient()):
-        response = client.get(url, params={'search': email})
-        return HelpDeskUser(response.get('result')[0])
+            url='api/v1/users',
+            client=faveo_db.APIClient()):
+        response = client.get(url, params={'email': email})
+        return HelpDeskUser(**response) if response else None
 
     @staticmethod
     def create_user(
             email, first_name, last_name,
             url='api/v1/helpdesk/register',
-            client=APIClient()):
+            client=faveo.APIClient()):
+
+        user = HelpDeskUser.get(email)
+        if user:
+            return user
+
         params = dict(email=email, first_name=first_name, last_name=last_name)
         result = client.post(url, params)
         return HelpDeskUser(**result[0].get('user'))
