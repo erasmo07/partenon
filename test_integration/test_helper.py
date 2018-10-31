@@ -15,10 +15,7 @@ def test_can_create_user():
     user = HelpDeskUser.create_user(**body)
 
     user_keys = [
-        'updated_at', 'email', 'first_name',
-        'mobile', 'id', 'user_name', 'email_verify',
-        'role', 'created_at', 'agent_tzone', 'mobile_otp_verify',
-        'last_name']
+        'email', 'first_name', 'id', 'role', 'created_at', 'last_name']
     for key in user_keys:
         assert(hasattr(user, key))
 
@@ -91,10 +88,7 @@ def test_can_search_user_by_email():
     user = HelpDeskUser.get(email)
 
     user_keys = [
-        'updated_at', 'email', 'first_name',
-        'mobile', 'id', 'user_name', 'email_verify',
-        'role', 'created_at', 'agent_tzone', 'mobile_otp_verify',
-        'last_name']
+        'email', 'first_name', 'id', 'role', 'last_name']
     for key in user_keys:
         assert(hasattr(user, key))
 
