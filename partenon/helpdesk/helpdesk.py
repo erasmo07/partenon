@@ -166,7 +166,8 @@ class HelpDeskUser(BaseEntityHelpDesk, BaseHelpDesk):
     @staticmethod
     def get(email,
             url='api/v1/users',
-            client=faveo_db.APIClient()):
+            client=faveo_db.APIClient):
+        client = client()
         response = client.get(url, params={'email': email})
         return HelpDeskUser(**response) if response else None
 
@@ -174,8 +175,9 @@ class HelpDeskUser(BaseEntityHelpDesk, BaseHelpDesk):
     def create_user(
             email, first_name, last_name,
             url='api/v1/helpdesk/register',
-            client=faveo.APIClient()):
-
+            client=faveo.APIClient):
+        
+        client = client()
         user = HelpDeskUser.get(email)
         if user:
             return user
