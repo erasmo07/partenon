@@ -1,4 +1,4 @@
-from .erp import ERPAviso
+from .erp import ERPAviso, ERPClient
 
-__all__ = ['ERPAviso']
+__all__ = ['ERPAviso', 'ERPClient']
 

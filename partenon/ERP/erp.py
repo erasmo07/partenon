@@ -3,6 +3,11 @@ from oraculo.gods.sap import APIClient
 from ..base import BaseEntity
 
 
+class ERPClient(BaseEntity):
+    _client = APIClient()
+    _info_url = 'api_portal_clie/datos_cliente'
+
+
 class ERPAviso(BaseEntity):
     _client = APIClient()
     _create_url = '/api_portal_clie/crear_aviso'
