@@ -21,7 +21,7 @@ class BaseHelpDesk(object):
 
 
 class BaseEntityHelpDesk(object):
-    
+
     def __init__(self, *args, **kwargs):
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -44,15 +44,17 @@ class State(BaseEntityHelpDesk):
 
 class HelpDeskGetEntity(BaseHelpDesk):
     def __init__(self, url, entity, key_name='name'):
-        self._url = url 
-        self._entity = entity 
+        self._url = url
+        self._entity = entity
         self._client = faveo.APIClient()
         self._key_name = key_name
 
     def get_entitys(self):
         response = self._client.get(self._url)
-        return map(self._entity, response.get('result'))
-    
+        entity = [self._entity(**response)
+                  for response in response.get('result')]
+        return entity
+
     def get_by_name(self, name):
         response = self._client.get(self._url, {'name': name})
         for item in response.get('result'):
