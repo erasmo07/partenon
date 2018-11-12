@@ -9,18 +9,26 @@ class ERPClient(BaseEntity):
 
 
 class ERPAviso(BaseEntity):
-    _client = APIClient()
-    _create_url = '/api_portal_clie/crear_aviso'
+    _client = APIClient
+    _create_url = 'api_portal_clie/crear_aviso'
+    _info_url = 'api_portal_clie/info_aviso'
 
     def create(
         self, client_sap, text, text_larg,
-        email, id_service, language='S'):
-
+        service_name, email, type_service, language='S'):
         body = {
             "I_CLIENTE": client_sap, "I_TXT_CORTO": text,
             "I_TXT_LARGO": text_larg, "I_IDIOMA": language,
-            "I_ID_SERVICIO": id_service, "I_CORREO": email 
-        } 
-
-        response = self._client.post(self._create_url, body)
-        return ERPAviso(**response) 
+            "I_TEXTO_SERVICIO": service_name,
+            "I_ID_SERVICIO": type_service, "I_CORREO": email}
+        client = self._client()
+        response = client.post(self._create_url, body)
+        return ERPAviso(**response)
+    
+    def info(self, aviso=None, language="S"):
+        body = {
+            "I_AVISO" : aviso if aviso else self.aviso,
+            "I_IDIOMA" : language}
+        client = self._client()
+        response = client.post(self._info_url, body) 
+        return response
