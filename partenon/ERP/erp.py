@@ -27,9 +27,9 @@ class ERPAviso(BaseEntity):
         response = client.post(self._create_url, body)
         return ERPAviso(**response)
     
-    def info(self, aviso=None, language="S"):
+    def info(self, aviso, language="S"):
         body = {
-            "I_AVISO" : aviso if aviso else self.aviso,
+            "I_AVISO" : aviso,
             "I_IDIOMA" : language}
         client = self._client()
         response = client.post(self._info_url, body) 
