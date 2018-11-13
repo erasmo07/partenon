@@ -15,12 +15,14 @@ class ERPAviso(BaseEntity):
 
     def create(
         self, client_sap, text, text_larg,
-        service_name, email, type_service, language='S'):
+        service_name, email, type_service, language='S',
+        required_cotization=None):
         body = {
             "I_CLIENTE": client_sap, "I_TXT_CORTO": text,
             "I_TXT_LARGO": text_larg, "I_IDIOMA": language,
             "I_TEXTO_SERVICIO": service_name,
-            "I_ID_SERVICIO": type_service, "I_CORREO": email}
+            "I_ID_SERVICIO": type_service, "I_CORREO": email,
+            "REQUIRED_COTIZATION": True if required_cotization else False}
         client = self._client()
         response = client.post(self._create_url, body)
         return ERPAviso(**response)
