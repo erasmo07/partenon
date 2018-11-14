@@ -22,7 +22,7 @@ class ERPAviso(BaseEntity):
             "I_TXT_LARGO": text_larg, "I_IDIOMA": language,
             "I_TEXTO_SERVICIO": service_name,
             "I_ID_SERVICIO": type_service, "I_CORREO": email,
-            "REQUIRED_COTIZATION": True if required_cotization else False}
+            "I_REQUIRE_QUOTATION": True if required_cotization else False}
         client = self._client()
         response = client.post(self._create_url, body)
         return ERPAviso(**response)
