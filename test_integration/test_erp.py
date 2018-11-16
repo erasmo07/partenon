@@ -1,5 +1,6 @@
 import requests
-from partenon.ERP import ERPAviso 
+from mock import MagicMock
+from partenon.ERP import ERPAviso
 
 
 def test_can_create_aviso():
@@ -12,3 +13,16 @@ def test_can_create_aviso():
     erp_aviso = ERPAviso()
     aviso = erp_aviso.create(**kwargs)
     assert(hasattr(aviso, 'aviso'))
+
+
+def test_can_update_aviso():
+    client = MagicMock()
+    kwargs = dict(
+        aviso=1, status='TEST',
+        client=client, update_url='test')
+
+    ERPAviso.update(**kwargs)
+
+    client.post.assert_called()
+    client.post.assert_called_with(
+        'test', {'I_AVISO': 1, "I_STATUS": 'TEST'})
