@@ -34,3 +34,12 @@ class ERPAviso(BaseEntity):
         client = self._client()
         response = client.post(self._info_url, body) 
         return response
+    
+    @staticmethod
+    def update(
+        aviso, status,
+        client=APIClient(),
+        update_url='api_portal_clie/update_aviso'):
+        body = {"I_AVISO": aviso, "I_STATUS": status}
+        response = client.post(update_url, body) 
+        return True
