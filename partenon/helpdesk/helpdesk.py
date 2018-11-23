@@ -1,17 +1,9 @@
 import os
-from oraculo.gods import faveo, faveo_db
+from oraculo.gods import faveo, faveo_db, exceptions
 
-
-class DoesNotExist(Exception):
-    pass
-
-
-class NotSetHelpDeskUserInstance(Exception):
-    pass
-
-
-class NotIsInstance(Exception):
-    pass
+from .exceptions import (
+    DoesNotExist, NotSetHelpDeskUserInstance,
+    NotIsInstance)
 
 
 class BaseHelpDesk(object):
