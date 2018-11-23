@@ -1,6 +1,8 @@
 import os
 from oraculo.gods.sap import APIClient
+from oraculo.gods.exceptions import NotFound
 from ..base import BaseEntity
+from . import exceptions
 
 
 class ERPClient(BaseEntity):
