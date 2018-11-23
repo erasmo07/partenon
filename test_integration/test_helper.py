@@ -1,7 +1,11 @@
 import random
 import string
+from mock import MagicMock
 from oraculo.gods import faveo
-from partenon.helpdesk import HelpDeskUser, Topic, Priority, Status
+from oraculo.gods.exceptions import NotHasResponse
+from partenon.helpdesk import HelpDeskUser, Topics, Prioritys, Status
+from partenon.helpdesk.entitys import Topic, Priority
+from partenon.helpdesk import exceptions
 
 
 def generate_random_strin(length):
@@ -105,7 +109,18 @@ def test_can_search_status_by_name():
 
     assert(hasattr(state_open, 'id'))
     assert(hasattr(state_open, 'name'))
-    assert(state_open.name == 'Open')
+    assert(getattr(state_open, 'name') == 'Open')
+
+
+def test_cant_search_status_by_name():
+    client = MagicMock()
+    client.get.side_effect = NotHasResponse 
+    try:
+        Status.get_state_by_name('Open', client=client)
+        assert(False)
+    except :
+        assert(True)
+
 
 def test_can_close_a_ticket():
     email = "%s@example.com" % generate_random_strin(4)

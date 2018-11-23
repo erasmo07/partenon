@@ -1,0 +1,2 @@
+class NotHasOrder(Exception):
+    pass

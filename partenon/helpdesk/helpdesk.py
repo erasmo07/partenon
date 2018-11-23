@@ -1,111 +1,49 @@
 import os
-from oraculo.gods import faveo, faveo_db
-
-
-class DoesNotExist(Exception):
-    pass
-
-
-class NotSetHelpDeskUserInstance(Exception):
-    pass
-
-
-class NotIsInstance(Exception):
-    pass
-
-
-class BaseHelpDesk(object):
-
-    def __init__(self):
-        self._client = faveo.APIClient()
-
-
-class BaseEntityHelpDesk(object):
-
-    def __init__(self, *args, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-
-class Topic(BaseEntityHelpDesk):
-    pass
-
-
-class Priority(BaseEntityHelpDesk):
-    pass
-
-
-class State(BaseEntityHelpDesk):
-    pass
-
-    def __repr__(self):
-        return "<Status %s>" % self.name
-
-
-class HelpDeskGetEntity(BaseHelpDesk):
-    def __init__(self, url, entity, key_name='name'):
-        self._url = url
-        self._entity = entity
-        self._client = faveo.APIClient()
-        self._key_name = key_name
-
-    def get_entitys(self):
-        response = self._client.get(self._url)
-        entity = [self._entity(**response)
-                  for response in response.get('result')]
-        return entity
-
-    def get_by_name(self, name):
-        response = self._client.get(self._url, {'name': name})
-        for item in response.get('result'):
-            if item[self._key_name] == name:
-                return self._entity(**item)
-        else:
-            raise DoesNotExist('Not exists %s ' % name)
+from oraculo.gods import faveo, faveo_db, exceptions
+from . import entitys, base
+from .exceptions import (
+    DoesNotExist, NotSetHelpDeskUserInstance,
+    NotIsInstance)
 
 
 class Prioritys(object):
     _url = 'api/v1/helpdesk/priority'
-    _entity = Priority
-    objects = HelpDeskGetEntity(_url, _entity, key_name='priority')
+    _entity = entitys.Priority
+    objects = base.BaseManageEntity(_url, _entity, key_name='priority')
 
 
 class Topics(object):
     _url = 'api/v1/helpdesk/help-topic'
-    _entity = Topic
-    objects = HelpDeskGetEntity(_url, _entity, key_name='topic')
+    _entity = entitys.Topic
+    objects = base.BaseManageEntity(_url, _entity, key_name='topic')
 
 
-class Status(HelpDeskGetEntity):
+class Status(base.BaseManageEntity):
     _url = 'api/v1/helpdesk/dependency'
-    _entity = State
+    _entity = entitys.State
     _client = faveo.APIClient()
 
     @staticmethod
     def get_entitys(
-            client=faveo.APIClient(),
-            url='api/v1/helpdesk/dependency',
-            entity=State):
+            entity=entitys.State,
+            url='api/v1/status',
+            client=faveo_db.APIClient()):
         response = client.get(url)
-        status = response.get('data').get('status')
-        return [entity(**state) for state in status]
+        return [entity(**state) for state in response]
 
     @staticmethod
     def get_state_by_name(
             name,
-            client=faveo.APIClient(),
-            url='api/v1/helpdesk/dependency',
-            entity=State):
-        response = client.get(url)
-        status = response.get('data').get('status')
-        for state in status:
-            if state['name'] == name:
-                return State(**state)
-        else:
-            raise DoesNotExist('Not exists Status %s ' % name)
+            client=faveo_db.APIClient(),
+            url='api/v1/status',
+            entity=entitys.State):
+        response = client.get(url, params=dict(name=name))
+        return entity(**response[0])
 
 
-class HelpDeskTicket(BaseEntityHelpDesk, BaseHelpDesk):
+class HelpDeskTicket(
+        base.BaseEntityHelpDesk,
+        base.BaseHelpDesk):
     _user = None
     _client = faveo.APIClient()
     _status_close_name = 'Closed'
@@ -123,10 +61,10 @@ class HelpDeskTicket(BaseEntityHelpDesk, BaseHelpDesk):
         return Status.get_state_by_name(ticket.get('status_name'))
 
     def create(self, subject, body, priority, topic):
-        if not isinstance(priority, Priority):
+        if not isinstance(priority, entitys.Priority):
             raise NotIsInstance('Priority not is instance of Priority')
         
-        if not isinstance(topic, Topic):
+        if not isinstance(topic, entitys.Topic):
             raise NotIsInstance('Topic not is instance of Topic')
 
         body = dict(
@@ -157,7 +95,7 @@ class HelpDeskTicket(BaseEntityHelpDesk, BaseHelpDesk):
         return response.get('success')
 
 
-class HelpDeskUser(BaseEntityHelpDesk, BaseHelpDesk):
+class HelpDeskUser(base.BaseEntityHelpDesk, base.BaseHelpDesk):
     _url = 'api/v1/helpdesk/register'
     _search_url = 'api/v1/helpdesk/agents'
 
