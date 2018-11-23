@@ -42,6 +42,12 @@ class ERPAviso(BaseEntity):
         aviso, status,
         client=APIClient(),
         update_url='api_portal_clie/update_aviso'):
-        body = {"I_AVISO": aviso, "I_STATUS": status}
-        response = client.post(update_url, body) 
-        return True
+        body = {
+            "I_AVISO": aviso,
+            "I_STATUS": status,
+            "I_IDIOMA": "S"}
+        try:
+            return client.post(update_url, body)
+        except NotFound:
+            message = 'The %s warning does not have a created order.' % aviso
+            raise exceptions.NotHasOrder(message) 
