@@ -1,22 +1,9 @@
 import os
 from oraculo.gods import faveo, faveo_db, exceptions
-
+from . import entitys, base
 from .exceptions import (
     DoesNotExist, NotSetHelpDeskUserInstance,
     NotIsInstance)
-
-
-class BaseHelpDesk(object):
-
-    def __init__(self):
-        self._client = faveo.APIClient()
-
-
-class BaseEntityHelpDesk(object):
-
-    def __init__(self, *args, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
 
 
 class Topic(BaseEntityHelpDesk):
@@ -58,17 +45,17 @@ class HelpDeskGetEntity(BaseHelpDesk):
 
 class Prioritys(object):
     _url = 'api/v1/helpdesk/priority'
-    _entity = Priority
-    objects = HelpDeskGetEntity(_url, _entity, key_name='priority')
+    _entity = entitys.Priority
+    objects = base.BaseManageEntity(_url, _entity, key_name='priority')
 
 
 class Topics(object):
     _url = 'api/v1/helpdesk/help-topic'
-    _entity = Topic
-    objects = HelpDeskGetEntity(_url, _entity, key_name='topic')
+    _entity = entitys.Topic
+    objects = base.BaseManageEntity(_url, _entity, key_name='topic')
 
 
-class Status(HelpDeskGetEntity):
+class Status(base.BaseManageEntity):
     _url = 'api/v1/helpdesk/dependency'
     _entity = State
     _client = faveo.APIClient()
@@ -97,7 +84,9 @@ class Status(HelpDeskGetEntity):
             raise DoesNotExist('Not exists Status %s ' % name)
 
 
-class HelpDeskTicket(BaseEntityHelpDesk, BaseHelpDesk):
+class HelpDeskTicket(
+        base.BaseEntityHelpDesk,
+        base.BaseHelpDesk):
     _user = None
     _client = faveo.APIClient()
     _status_close_name = 'Closed'
@@ -149,7 +138,7 @@ class HelpDeskTicket(BaseEntityHelpDesk, BaseHelpDesk):
         return response.get('success')
 
 
-class HelpDeskUser(BaseEntityHelpDesk, BaseHelpDesk):
+class HelpDeskUser(base.BaseEntityHelpDesk, base.BaseHelpDesk):
     _url = 'api/v1/helpdesk/register'
     _search_url = 'api/v1/helpdesk/agents'
 
