@@ -25,4 +25,28 @@ def test_can_update_aviso():
 
     client.post.assert_called()
     client.post.assert_called_with(
-        'test', {'I_AVISO': 1, "I_STATUS": 'TEST'})
+        'test',
+        {'I_AVISO': 1,
+         "I_STATUS": 'TEST',
+         "I_IDIOMA": "S"})
+
+
+def test_can_update_aviso_real():
+    kwargs = dict(
+        client_sap="4259", text="TEXTO CORTO",
+        text_larg="TEXTO LARGO", type_service="SM013",
+        email="MHERRERA@PUNTACANA.COM",
+        service_name='SERVICE NAME')
+
+    erp_aviso = ERPAviso()
+
+    aviso = erp_aviso.create(**kwargs)
+    assert(hasattr(aviso, 'aviso'))
+    
+    client = MagicMock()
+    client.post.return_value = None
+    kwargs = dict(
+        aviso=int(aviso.aviso),
+        status='RACO', client=client)
+    value = ERPAviso.update(**kwargs)
+    assert(value == None)
