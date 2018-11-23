@@ -25,26 +25,20 @@ class Status(base.BaseManageEntity):
 
     @staticmethod
     def get_entitys(
-            client=faveo.APIClient(),
-            url='api/v1/helpdesk/dependency',
-            entity=State):
+            entity=entitys.State,
+            url='api/v1/status',
+            client=faveo_db.APIClient()):
         response = client.get(url)
-        status = response.get('data').get('status')
-        return [entity(**state) for state in status]
+        return [entity(**state) for state in response]
 
     @staticmethod
     def get_state_by_name(
             name,
-            client=faveo.APIClient(),
-            url='api/v1/helpdesk/dependency',
-            entity=State):
-        response = client.get(url)
-        status = response.get('data').get('status')
-        for state in status:
-            if state['name'] == name:
-                return State(**state)
-        else:
-            raise DoesNotExist('Not exists Status %s ' % name)
+            client=faveo_db.APIClient(),
+            url='api/v1/status',
+            entity=entitys.State):
+        response = client.get(url, params=dict(name=name))
+        return entity(**response[0])
 
 
 class HelpDeskTicket(
