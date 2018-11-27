@@ -27,16 +27,18 @@ class Status(base.BaseManageEntity):
     def get_entitys(
             entity=entitys.State,
             url='api/v1/status',
-            client=faveo_db.APIClient()):
+            client=faveo_db.APIClient):
+        client = client()
         response = client.get(url)
         return [entity(**state) for state in response]
 
     @staticmethod
     def get_state_by_name(
             name,
-            client=faveo_db.APIClient(),
+            entity=entitys.State,
             url='api/v1/status',
-            entity=entitys.State):
+            client=faveo_db.APIClient):
+        client = client()
         response = client.get(url, params=dict(name=name))
         return entity(**response[0])
 

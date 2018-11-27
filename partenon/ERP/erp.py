@@ -14,6 +14,8 @@ class ERPAviso(BaseEntity):
     _client = APIClient
     _create_url = 'api_portal_clie/crear_aviso'
     _info_url = 'api_portal_clie/info_aviso'
+    _create_quotation_url = 'api_portal_clie/create_quotatio' 
+    aviso = None
 
     def create(
         self, client_sap, text, text_larg,
@@ -51,3 +53,12 @@ class ERPAviso(BaseEntity):
         except NotFound:
             message = 'The %s warning does not have a created order.' % aviso
             raise exceptions.NotHasOrder(message) 
+    
+    def create_quotation(self):
+        if not hasattr(self, 'aviso'):
+            raise AttributeError('Not has aviso set attribute')
+        
+        client = self._client()
+        body = {"I_AVISO": self.aviso, "I_IDIOMA": 'S'}
+        response = client.post(self._create_quotation_url, body)
+        return response.get('pdf')
