@@ -6,8 +6,14 @@ from . import exceptions
 
 
 class ERPClient(BaseEntity):
-    _client = APIClient()
+    _client = APIClient
     _info_url = 'api_portal_clie/datos_cliente'
+    client_number = None
+
+    def info(self):
+        client = self._client()
+        body = {"I_CLIENTE": self.client_number}  
+        return client.post(self._info_url, body)
 
 
 class ERPAviso(BaseEntity):
@@ -42,8 +48,9 @@ class ERPAviso(BaseEntity):
     @staticmethod
     def update(
         aviso, status,
-        client=APIClient(),
+        client=APIClient,
         update_url='api_portal_clie/update_aviso'):
+        client = client()
         body = {
             "I_AVISO": aviso,
             "I_STATUS": status,
