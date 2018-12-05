@@ -54,6 +54,7 @@ class HelpDeskTicket(
     _list_url = 'api/v1/helpdesk/my-tickets-user'
     _url_detail = 'api/v1/helpdesk/ticket'
     _url_to_change_status = 'api/v2/helpdesk/status/change'
+    _url_to_add_note = 'api/v1/helpdesk/internal-note'
 
     @property
     def state(self):
@@ -61,6 +62,11 @@ class HelpDeskTicket(
             self._url_detail, params=dict(id=self.ticket_id))
         ticket = response.get('data').get('ticket')
         return Status.get_state_by_name(ticket.get('status_name'))
+    
+    def add_note(self, note):
+        body = dict(ticket_id=self.ticket_id, user_id=self._user.id, body=note)
+        response = self._client.post(self._url_to_add_note, body=body)
+        return response
 
     def create(self, subject, body, priority, topic):
         if not isinstance(priority, entitys.Priority):
@@ -75,7 +81,7 @@ class HelpDeskTicket(
             help_topic=topic.id, dept=self._department)
 
         response = self._client.post(self._create_url, body).get('response')
-        return HelpDeskTicket(**response)
+        return HelpDeskTicket(_user=self._user, **response)
 
     def list(self):
         if not self._user:
@@ -83,6 +89,10 @@ class HelpDeskTicket(
 
         params = dict(user_id=self._user.id)
         response = self._client.get(self._list_url, params)
+
+        if not isinstance(response, list):
+            raise NotIsInstance(response.get('error'))
+
         return [HelpDeskTicket(**ticket) for ticket in response.get('tickets')]
 
     def change_state(self, state):
@@ -95,6 +105,12 @@ class HelpDeskTicket(
         body = dict(ticket_id=self.ticket_id, status_id=state_close.id)
         response = self._client.post(self._url_to_change_status, body)
         return response.get('success')
+    
+    def get_specific_ticket(self, id):
+        response = self._client.get(self._url_detail, params=dict(id=id))
+        ticket_detail = response.get('data').get('ticket')
+        ticket_detail['ticket_id'] = ticket_detail['id']
+        return HelpDeskTicket(_user=self._user, **ticket_detail)
 
 
 class HelpDeskUser(base.BaseEntityHelpDesk, base.BaseHelpDesk):
@@ -130,4 +146,4 @@ class HelpDeskUser(base.BaseEntityHelpDesk, base.BaseHelpDesk):
 
 
 class HelpDesk(object):
-    pass
+    user = HelpDeskUser

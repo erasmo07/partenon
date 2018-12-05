@@ -137,6 +137,8 @@ def test_can_close_a_ticket():
     ticket = user.ticket.create(**body)
 
     ticket.close()
+    assert(ticket.state.name == 'Closed')
+
 
 def test_can_change_status_ticket():
     email = "%s@example.com" % generate_random_strin(4)
@@ -155,4 +157,22 @@ def test_can_change_status_ticket():
     state_resolve = Status.get_state_by_name('Resolved')
 
     ticket.change_state(state_resolve)
-    assert(ticket.state.name == 'Resolved')    
+    assert(ticket.state.name == 'Resolved')
+
+
+def test_can_add_note_to_ticket():
+    email = "%s@example.com" % generate_random_strin(4)
+    body = {'email': email, 'first_name': 'test', 'last_name': 'test'}
+
+    user = HelpDeskUser.create_user(**body)
+
+    subject = generate_random_strin(60)
+    body = generate_random_strin(150)
+    priority = Priority(**dict(priority_id=2))
+    topic = Topic(**dict(id=40))
+
+    body = dict(subject=subject, body=body, priority=priority, topic=topic)
+    ticket = user.ticket.create(**body)
+    thread = ticket.add_note('TEST')
+
+    assert(thread.get('thread').get('body') == 'TEST')
