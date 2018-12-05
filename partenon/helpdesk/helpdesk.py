@@ -63,6 +63,21 @@ class HelpDeskTicket(
         ticket = response.get('data').get('ticket')
         return Status.get_state_by_name(ticket.get('status_name'))
     
+    @property
+    def user(self):
+        return self._user
+    
+    @staticmethod
+    def get_specific_ticket(
+        ticket_id,
+        url='api/v1/helpdesk/ticket',
+        client = faveo.APIClient()):
+        response = client.get(url, params=dict(id=ticket_id))
+        ticket_detail = response.get('data').get('ticket')
+        ticket_detail['ticket_id'] = ticket_detail['id']
+        user = HelpDeskUser(**ticket_detail.get('from'))
+        return HelpDeskTicket(_user=user, **ticket_detail)
+
     def add_note(self, note):
         body = dict(ticket_id=self.ticket_id, user_id=self._user.id, body=note)
         response = self._client.post(self._url_to_add_note, body=body)
@@ -106,12 +121,6 @@ class HelpDeskTicket(
         response = self._client.post(self._url_to_change_status, body)
         return response.get('success')
     
-    def get_specific_ticket(self, id):
-        response = self._client.get(self._url_detail, params=dict(id=id))
-        ticket_detail = response.get('data').get('ticket')
-        ticket_detail['ticket_id'] = ticket_detail['id']
-        return HelpDeskTicket(_user=self._user, **ticket_detail)
-
 
 class HelpDeskUser(base.BaseEntityHelpDesk, base.BaseHelpDesk):
     _url = 'api/v1/helpdesk/register'
