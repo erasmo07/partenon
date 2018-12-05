@@ -3,7 +3,8 @@ import string
 from mock import MagicMock
 from oraculo.gods import faveo
 from oraculo.gods.exceptions import NotHasResponse
-from partenon.helpdesk import HelpDeskUser, Topics, Prioritys, Status
+from partenon.helpdesk import (
+    HelpDeskUser, Topics, Prioritys, Status, HelpDeskTicket)
 from partenon.helpdesk.entitys import Topic, Priority
 from partenon.helpdesk import exceptions
 
@@ -171,8 +172,32 @@ def test_can_add_note_to_ticket():
     priority = Priority(**dict(priority_id=2))
     topic = Topic(**dict(id=40))
 
-    body = dict(subject=subject, body=body, priority=priority, topic=topic)
+    body = dict(
+        subject=subject, body=body,
+        priority=priority, topic=topic)
     ticket = user.ticket.create(**body)
     thread = ticket.add_note('TEST')
 
     assert(thread.get('thread').get('body') == 'TEST')
+    assert(thread.get('thread').get('user_id') == user.id)
+
+
+def test_can_search_expecific_ticket():
+    email = "%s@example.com" % generate_random_strin(4)
+    body = {'email': email, 'first_name': 'test', 'last_name': 'test'}
+
+    user = HelpDeskUser.create_user(**body)
+
+    subject = generate_random_strin(60)
+    body = generate_random_strin(150)
+    priority = Priority(**dict(priority_id=2))
+    topic = Topic(**dict(id=40))
+
+    body = dict(
+        subject=subject, body=body,
+        priority=priority, topic=topic)
+    ticket_create = user.ticket.create(**body)
+    ticket_search = HelpDeskTicket.get_specific_ticket(ticket_create.ticket_id)
+
+    assert(ticket_create.ticket_id == ticket_search.ticket_id)
+    assert(ticket_create.user.id == ticket_search.user.id)
