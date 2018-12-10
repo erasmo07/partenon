@@ -176,7 +176,7 @@ def test_can_add_note_to_ticket():
         subject=subject, body=body,
         priority=priority, topic=topic)
     ticket = user.ticket.create(**body)
-    thread = ticket.add_note('TEST')
+    thread = ticket.add_note('TEST', user)
 
     assert(thread.get('thread').get('body') == 'TEST')
     assert(thread.get('thread').get('user_id') == user.id)

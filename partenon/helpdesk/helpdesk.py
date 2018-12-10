@@ -55,6 +55,7 @@ class HelpDeskTicket(
     _url_detail = 'api/v1/helpdesk/ticket'
     _url_to_change_status = 'api/v2/helpdesk/status/change'
     _url_to_add_note = 'api/v1/helpdesk/internal-note'
+    ticket_id = None
 
     @property
     def state(self):
@@ -78,8 +79,8 @@ class HelpDeskTicket(
         user = HelpDeskUser(**ticket_detail.get('from'))
         return HelpDeskTicket(_user=user, **ticket_detail)
 
-    def add_note(self, note):
-        body = dict(ticket_id=self.ticket_id, user_id=self._user.id, body=note)
+    def add_note(self, note, user):
+        body = dict(ticket_id=self.ticket_id, user_id=user.id, body=note)
         response = self._client.post(self._url_to_add_note, body=body)
         return response
 
@@ -156,3 +157,6 @@ class HelpDeskUser(base.BaseEntityHelpDesk, base.BaseHelpDesk):
 
 class HelpDesk(object):
     user = HelpDeskUser
+    topics = Topics
+    prioritys = Prioritys 
+

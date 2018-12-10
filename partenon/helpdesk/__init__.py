@@ -1,4 +1,4 @@
-from .helpdesk import (
+from partenon.helpdesk.helpdesk import (
     HelpDesk, HelpDeskUser, Topics, Prioritys,
     Status, HelpDeskTicket)
 
