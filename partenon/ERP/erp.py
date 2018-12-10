@@ -2,7 +2,7 @@ import os
 from oraculo.gods.sap import APIClient
 from oraculo.gods.exceptions import NotFound
 from ..base import BaseEntity
-from . import exceptions
+from partenon.ERP import exceptions
 
 
 class ERPClient(BaseEntity):
@@ -23,13 +23,36 @@ class ERPAviso(BaseEntity):
     _create_quotation_url = 'api_portal_clie/create_quotatio' 
     aviso = None
 
+    @property
+    def responsable(self):
+        if not hasattr(self, 'aviso'):
+            raise AttributeError('Not has atribute aviso')
+
+        body = {
+            "I_AVISO" : self.aviso,
+            "I_IDIOMA" : 'S'}
+        client = self._client()
+        response = client.post(self._info_url, body) 
+        responsable = response.get('responsable')
+        return BaseEntity(**responsable)
+    
+    @property
+    def client(self):
+        if not hasattr(self, 'aviso'):
+            raise AttributeError('Not has atribute aviso ni cliente')
+
+        info = self.info(self.aviso)
+        client = ERPClient(client_number=info.get('cliente'))
+        return BaseEntity(**client.info())
+
     def create(
         self, client_sap, text, text_larg,
-        service_name, email, type_service, language='S',
+        service_name, email, type_service,
         require_quotation=None):
         body = {
             "I_CLIENTE": client_sap, "I_TXT_CORTO": text,
-            "I_TXT_LARGO": text_larg, "I_IDIOMA": language,
+            "I_TXT_LARGO": text_larg,
+            "I_IDIOMA": self.client.idioma,
             "I_TEXTO_SERVICIO": service_name,
             "I_ID_SERVICIO": type_service, "I_CORREO": email,
             "I_REQUIRE_QUOTATION": True if require_quotation else False}
@@ -66,6 +89,6 @@ class ERPAviso(BaseEntity):
             raise AttributeError('Not has aviso set attribute')
         
         client = self._client()
-        body = {"I_AVISO": self.aviso, "I_IDIOMA": 'S'}
+        body = {"I_AVISO": self.aviso, "I_IDIOMA": self.client.idioma}
         response = client.post(self._create_quotation_url, body)
         return response.get('pdf')
