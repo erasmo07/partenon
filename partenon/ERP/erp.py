@@ -21,6 +21,7 @@ class ERPAviso(BaseEntity):
     _create_url = 'api_portal_clie/crear_aviso'
     _info_url = 'api_portal_clie/info_aviso'
     _create_quotation_url = 'api_portal_clie/create_quotatio' 
+    _sap_customer = None
     aviso = None
 
     @property
@@ -40,21 +41,27 @@ class ERPAviso(BaseEntity):
     def client(self):
         if not hasattr(self, 'aviso'):
             raise AttributeError('Not has atribute aviso ni cliente')
+        
+        if not self._sap_customer:
+            raise AttributeError('Not has atribute sap_customer')
 
-        info = self.info(self.aviso)
-        client = ERPClient(client_number=info.get('cliente'))
+        client = ERPClient(client_number=self._sap_customer)
         return BaseEntity(**client.info())
 
     def create(
         self, client_sap, text, text_larg,
         service_name, email, type_service,
         require_quotation=None):
+
+        self._sap_customer = client_sap 
         body = {
-            "I_CLIENTE": client_sap, "I_TXT_CORTO": text,
+            "I_CLIENTE": client_sap,
+            "I_TXT_CORTO": text,
             "I_TXT_LARGO": text_larg,
-            "I_IDIOMA": self.client.idioma,
+            "I_IDIOMA": "S",
             "I_TEXTO_SERVICIO": service_name,
-            "I_ID_SERVICIO": type_service, "I_CORREO": email,
+            "I_ID_SERVICIO": type_service,
+            "I_CORREO": email,
             "I_REQUIRE_QUOTATION": True if require_quotation else False}
         client = self._client()
         response = client.post(self._create_url, body)
