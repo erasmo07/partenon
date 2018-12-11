@@ -96,6 +96,6 @@ class ERPAviso(BaseEntity):
             raise AttributeError('Not has aviso set attribute')
         
         client = self._client()
-        body = {"I_AVISO": self.aviso, "I_IDIOMA": self.client.idioma}
+        body = {"I_AVISO": self.aviso, "I_IDIOMA": "S"}
         response = client.post(self._create_quotation_url, body)
         return response.get('pdf')
