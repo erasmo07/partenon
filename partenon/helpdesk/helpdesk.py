@@ -72,7 +72,7 @@ class HelpDeskTicket(
     def get_specific_ticket(
         ticket_id,
         url='api/v1/helpdesk/ticket',
-        client = faveo.APIClient()):
+        client=faveo.APIClient()):
         response = client.get(url, params=dict(id=ticket_id))
         ticket_detail = response.get('data').get('ticket')
         ticket_detail['ticket_id'] = ticket_detail['id']
@@ -97,7 +97,7 @@ class HelpDeskTicket(
             help_topic=topic.id, dept=self._department)
 
         response = self._client.post(self._create_url, body).get('response')
-        return HelpDeskTicket(_user=self._user, **response)
+        return self.get_specific_ticket(response.get('ticket_id'))
 
     def list(self):
         if not self._user:
