@@ -150,8 +150,6 @@ class HelpDeskUser(base.BaseEntityHelpDesk, base.BaseHelpDesk):
         if user:
             return user
 
-        first_name = first_name.replace(' ', '_') 
-        last_name = last_name.replace(' ', '_') 
         params = dict(email=email, first_name=first_name, last_name=last_name)
         result = client.post(url, params)
         return HelpDeskUser(**result[0].get('user'))
