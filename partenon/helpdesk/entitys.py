@@ -9,6 +9,10 @@ class Priority(BaseEntityHelpDesk):
     pass
 
 
+class Department(BaseEntityHelpDesk):
+    pass
+
+
 class State(BaseEntityHelpDesk):
     name = None
 

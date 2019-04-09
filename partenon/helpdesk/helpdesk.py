@@ -17,6 +17,12 @@ class Topics(object):
     _entity = entitys.Topic
     objects = base.BaseManageEntity(_url, _entity, key_name='topic')
 
+    
+class Deparments(object):
+    _url = 'api/v1/helpdesk/department'
+    _entity = entitys.Department
+    objects = base.BaseManageEntity(_url, _entity)
+
 
 class Status(base.BaseManageEntity):
     _url = 'api/v1/helpdesk/dependency'
@@ -84,17 +90,20 @@ class HelpDeskTicket(
         response = self._client.post(self._url_to_add_note, body=body)
         return response
 
-    def create(self, subject, body, priority, topic):
+    def create(self, subject, body, priority, topic, deparment):
         if not isinstance(priority, entitys.Priority):
             raise NotIsInstance('Priority not is instance of Priority')
         
         if not isinstance(topic, entitys.Topic):
             raise NotIsInstance('Topic not is instance of Topic')
-
+        
+        if not isinstance(deparment, entitys.Department):
+            raise NotIsInstance('Department not is instance of Department')
+        
         body = dict(
             subject=subject, body=body, first_name=self._user.first_name,
             email=self._user.email, priority=priority.priority_id,
-            help_topic=topic.id, dept=self._department)
+            help_topic=topic.id, dept=deparment.id)
 
         response = self._client.post(self._create_url, body).get('response')
         return self.get_specific_ticket(response.get('ticket_id'))
@@ -159,4 +168,5 @@ class HelpDesk(object):
     user = HelpDeskUser
     topics = Topics
     prioritys = Prioritys 
+    departments = Deparments
 
