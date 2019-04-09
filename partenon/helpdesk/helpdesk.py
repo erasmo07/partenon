@@ -61,14 +61,16 @@ class HelpDeskTicket(
     _url_detail = 'api/v1/helpdesk/ticket'
     _url_to_change_status = 'api/v2/helpdesk/status/change'
     _url_to_add_note = 'api/v1/helpdesk/internal-note'
-    ticket_id = None
+    ticket_name = None
 
     @property
     def state(self):
-        response = self._client.get(
-            self._url_detail, params=dict(id=self.ticket_id))
-        ticket = response.get('data').get('ticket')
-        return Status.get_state_by_name(ticket.get('status_name'))
+        if not self.ticket_name:
+            response = self._client.get(
+                self._url_detail, params=dict(id=self.ticket_id))
+            ticket = response.get('data').get('ticket')
+            self.ticket_name = ticket.get('status_name')
+        return Status.get_state_by_name(self.ticket_name)
     
     @property
     def user(self):
