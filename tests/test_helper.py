@@ -4,7 +4,7 @@ from mock import MagicMock
 from oraculo.gods import faveo
 from oraculo.gods.exceptions import NotHasResponse
 from partenon.helpdesk import (
-    HelpDeskUser, Topics, Prioritys, Status, HelpDeskTicket)
+    HelpDeskUser, Topics, Prioritys, Status, HelpDeskTicket, HelpDesk)
 from partenon.helpdesk.entitys import Topic, Priority
 from partenon.helpdesk import exceptions
 
@@ -58,7 +58,12 @@ def test_can_create_ticket():
     priority = Priority(**dict(priority_id=2))
     topic = Topic(**dict(id=40))
 
-    body = dict(subject=subject, body=body, priority=priority, topic=topic)
+    department = HelpDesk.departments.objects.get_by_name(
+        'Informatica y Comunicaciones')
+
+    body = dict(
+        subject=subject, body=body, priority=priority,
+        topic=topic, department=department)
     ticket = user.ticket.create(**body)
 
     assert(hasattr(ticket, 'ticket_id'))
@@ -75,10 +80,15 @@ def test_can_list_my_tickets():
     priority = Priority(**dict(priority_id=2))
     topic = Topic(**dict(id=40))
 
-    body = dict(subject=subject, body=body, priority=priority, topic=topic)
-    user.ticket.create(**body)
+    department = HelpDesk.departments.objects.get_by_name(
+        'Informatica y Comunicaciones')
 
+    body = dict(
+        subject=subject, body=body, priority=priority,
+        topic=topic, department=department)
+    user.ticket.create(**body)
     tickets = user.ticket.list()
+
     for ticket in tickets:
         assert(hasattr(ticket, 'ticket_number'))
         assert(hasattr(ticket, 'ticket_status_name'))
@@ -133,8 +143,12 @@ def test_can_close_a_ticket():
     body = generate_random_strin(150)
     priority = Priority(**dict(priority_id=2))
     topic = Topic(**dict(id=40))
+    department = HelpDesk.departments.objects.get_by_name(
+        'Informatica y Comunicaciones')
 
-    body = dict(subject=subject, body=body, priority=priority, topic=topic)
+    body = dict(
+        subject=subject, body=body, priority=priority,
+        topic=topic, department=department)
     ticket = user.ticket.create(**body)
 
     ticket.close()
@@ -152,7 +166,12 @@ def test_can_change_status_ticket():
     priority = Priority(**dict(priority_id=2))
     topic = Topic(**dict(id=40))
 
-    body = dict(subject=subject, body=body, priority=priority, topic=topic)
+    department = HelpDesk.departments.objects.get_by_name(
+        'Informatica y Comunicaciones')
+
+    body = dict(
+        subject=subject, body=body, priority=priority, topic=topic,
+        department=department)
     ticket = user.ticket.create(**body)
 
     state_resolve = Status.get_state_by_name('Resolved')
@@ -172,9 +191,12 @@ def test_can_add_note_to_ticket():
     priority = Priority(**dict(priority_id=2))
     topic = Topic(**dict(id=40))
 
+    department = HelpDesk.departments.objects.get_by_name(
+        'Informatica y Comunicaciones')
+
     body = dict(
         subject=subject, body=body,
-        priority=priority, topic=topic)
+        priority=priority, topic=topic, department=department)
     ticket = user.ticket.create(**body)
     thread = ticket.add_note('TEST', user)
 
@@ -192,10 +214,12 @@ def test_can_search_expecific_ticket():
     body = generate_random_strin(150)
     priority = Priority(**dict(priority_id=2))
     topic = Topic(**dict(id=40))
+    department = HelpDesk.departments.objects.get_by_name(
+        'Informatica y Comunicaciones')
 
     body = dict(
-        subject=subject, body=body,
-        priority=priority, topic=topic)
+        subject=subject, body=body, priority=priority,
+        topic=topic, department=department)
     ticket_create = user.ticket.create(**body)
     ticket_search = HelpDeskTicket.get_specific_ticket(ticket_create.ticket_id)
 

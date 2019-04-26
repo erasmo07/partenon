@@ -92,20 +92,20 @@ class HelpDeskTicket(
         response = self._client.post(self._url_to_add_note, body=body)
         return response
 
-    def create(self, subject, body, priority, topic, deparment):
+    def create(self, subject, body, priority, topic, department):
         if not isinstance(priority, entitys.Priority):
             raise NotIsInstance('Priority not is instance of Priority')
         
         if not isinstance(topic, entitys.Topic):
             raise NotIsInstance('Topic not is instance of Topic')
         
-        if not isinstance(deparment, entitys.Department):
+        if not isinstance(department, entitys.Department):
             raise NotIsInstance('Department not is instance of Department')
         
         body = dict(
             subject=subject, body=body, first_name=self._user.first_name,
             email=self._user.email, priority=priority.priority_id,
-            help_topic=topic.id, dept=deparment.id)
+            help_topic=topic.id, department=department.id)
 
         response = self._client.post(self._create_url, body).get('response')
         return self.get_specific_ticket(response.get('ticket_id'))
@@ -117,7 +117,7 @@ class HelpDeskTicket(
         params = dict(user_id=self._user.id)
         response = self._client.get(self._list_url, params)
 
-        if not isinstance(response, list):
+        if not isinstance(response, dict) and response.get('tickets', None):
             raise NotIsInstance(response.get('error'))
 
         return [HelpDeskTicket(**ticket) for ticket in response.get('tickets')]
