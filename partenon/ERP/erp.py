@@ -8,12 +8,21 @@ from partenon.ERP import exceptions
 class ERPClient(BaseEntity):
     _client = APIClient
     _info_url = 'api_portal_clie/datos_cliente'
+    _search_url = 'api_portal_clie/dame_clientes' 
     client_number = None
+    client_name = None
+    client_code = None
 
     def info(self):
         client = self._client()
         body = {"I_CLIENTE": self.client_number}  
         return client.post(self._info_url, body)
+    
+    def search(self):
+        client = self._client()
+        return client.post(
+            self._search_url,
+            {"CODIGO": self.client_code, "NOMBRE": self.client_name})
 
 
 class ERPAviso(BaseEntity):
@@ -80,6 +89,7 @@ class ERPAviso(BaseEntity):
         aviso, status,
         client=APIClient,
         update_url='api_portal_clie/update_aviso'):
+
         client = client()
         body = {
             "I_AVISO": aviso,
