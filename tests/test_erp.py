@@ -1,6 +1,7 @@
 import requests
 from mock import MagicMock
-from partenon.ERP import ERPAviso
+from partenon.base import BaseEntity
+from partenon.ERP import ERPAviso, ERPClient
 
 
 def test_can_create_aviso():
@@ -17,6 +18,7 @@ def test_can_create_aviso():
 
 def test_can_update_aviso():
     client = MagicMock()
+    client.post.return_value = []
     kwargs = dict(
         aviso=1, status='TEST',
         client=client, update_url='test')
@@ -44,9 +46,30 @@ def test_can_update_aviso_real():
     assert(hasattr(aviso, 'aviso'))
     
     client = MagicMock()
-    client.post.return_value = None
+    client.post.return_value = {}
     kwargs = dict(
         aviso=int(aviso.aviso),
         status='RACO', client=client)
     value = ERPAviso.update(**kwargs)
-    assert(value == None)
+    assert(value == {})
+
+
+def test_can_search_responsable():
+    aviso = ERPAviso(aviso=514958)
+
+    assert(isinstance(aviso.responsable, BaseEntity))
+    assert(hasattr(aviso.responsable, 'codigo'))
+    assert(hasattr(aviso.responsable, 'nombre'))
+    assert(hasattr(aviso.responsable, 'nombre'))
+
+
+def test_can_seach_client():
+    kwargs = dict(client_code=4259)
+    client = ERPClient(**kwargs)
+
+    response = client.search()
+
+    assert(isinstance(response, list))
+    assert(len(response) == 1)
+    assert('codigo' in response[0])
+    assert('nombre' in response[0])
