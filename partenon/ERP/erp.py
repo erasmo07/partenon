@@ -52,7 +52,7 @@ class ERPAviso(BaseEntity):
             raise AttributeError('Not has atribute aviso ni cliente')
         
         if not self._sap_customer:
-            raise AttributeError('Not has atribute sap_customer')
+            self._sap_customer = self.info(self.aviso).get('cliente')
 
         client = ERPClient(client_number=self._sap_customer)
         return BaseEntity(**client.info())
@@ -100,6 +100,16 @@ class ERPAviso(BaseEntity):
         except NotFound:
             message = 'The %s warning does not have a created order.' % aviso
             raise exceptions.NotHasOrder(message) 
+    
+    @staticmethod
+    def update_client(
+        aviso,
+        client_number,
+        api_client=APIClient,
+        api_url='api_portal_clie/upt_clien_aviso'):
+
+        body = {"AVISO" : aviso, "CLIENTE" : client_number}
+        return api_client().post(api_url, body)
     
     def create_quotation(self):
         if not hasattr(self, 'aviso'):

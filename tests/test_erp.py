@@ -33,6 +33,20 @@ def test_can_update_aviso():
          "I_IDIOMA": "S"})
 
 
+def test_can_update_client_aviso():
+    client = MagicMock()
+    client.post.return_value = []
+    kwargs = dict(
+        aviso=1, client_number=1,
+        api_client=client, api_url='test')
+
+    ERPAviso.update_client(**kwargs)
+
+    body_expect = {'AVISO': 1, "CLIENT": 1}
+    client.post.assert_called()
+    client.post.assert_called_with('test', body_expect)
+
+
 def test_can_update_aviso_real():
     kwargs = dict(
         client_sap="4259", text="TEXTO CORTO",
