@@ -47,6 +47,17 @@ class Status(base.BaseManageEntity):
         client = client()
         response = client.get(url, params=dict(name=name))
         return entity(**response[0])
+    
+    @staticmethod
+    def get_by_id(
+            id,
+            entity=entitys.State,
+            url='api/v1/status',
+            client=faveo_db.APIClient):
+        client = client()
+        response = client.get(url, params=dict(id=id))
+        return entity(**response[0])
+
 
 
 class HelpDeskTicket(
@@ -171,4 +182,5 @@ class HelpDesk(object):
     topics = Topics
     prioritys = Prioritys 
     departments = Deparments
+    status = Status
 
