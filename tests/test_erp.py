@@ -87,3 +87,13 @@ def test_can_seach_client():
     assert(len(response) == 1)
     assert('codigo' in response[0])
     assert('nombre' in response[0])
+
+
+def test_can_check_client_has_credit():
+    kwargs = dict(client_code=4259)
+    client = ERPClient(**kwargs)
+
+    response = client.has_credit()
+    assert(isinstance(response, object))
+    assert(len(response) == 1)
+    assert('puede_consumir' in response)
