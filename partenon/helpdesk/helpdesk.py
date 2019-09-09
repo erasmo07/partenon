@@ -116,7 +116,7 @@ class HelpDeskTicket(
         body = dict(
             subject=subject, body=body, first_name=self._user.first_name,
             email=self._user.email, priority=priority.priority_id,
-            help_topic=topic.id, department=department.id)
+            help_topic=topic.id, dept=department.id)
 
         response = self._client.post(self._create_url, body).get('response')
         return self.get_specific_ticket(response.get('ticket_id'))
