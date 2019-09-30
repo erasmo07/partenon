@@ -10,6 +10,7 @@ class ERPClient(BaseEntity):
     _info_url = 'api_portal_clie/datos_cliente'
     _search_url = 'api_portal_clie/dame_clientes'
     _has_credit_url = 'api_portal_clie/clie_bad_credit'
+    _add_email = 'api_portal_clie/add_mail_resid'
     client_number = None
     client_name = None
     client_code = None
@@ -30,6 +31,11 @@ class ERPClient(BaseEntity):
         return client.post(
             self._has_credit_url,
             {"I_CLIENTE": self.client_code})
+    
+    def add_email(self, email):
+        client = self._client()
+        code = self.client_code if self.client_code else self.client_number
+        return client.post(self._add_email, {'CODIGO_SAP': code, 'CORREO': email})
 
 
 class ERPAviso(BaseEntity):

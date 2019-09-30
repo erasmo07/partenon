@@ -89,6 +89,13 @@ def test_can_seach_client():
     assert('nombre' in response[0])
 
 
+def test_can_add_email_to_client():
+    kwargs = dict(client_code=4259)
+    client = ERPClient(**kwargs)
+    response = client.add_email('aplicaciones@puntacana.com')
+    assert("Correo agregado" == response)
+
+
 def test_can_check_client_has_credit():
     kwargs = dict(client_code=4259)
     client = ERPClient(**kwargs)
