@@ -183,4 +183,5 @@ class HelpDesk(object):
     prioritys = Prioritys 
     departments = Deparments
     status = Status
+    ticket = HelpDeskTicket
 

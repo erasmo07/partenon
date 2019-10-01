@@ -38,6 +38,18 @@ class ERPClient(BaseEntity):
         return client.post(self._add_email, {'CODIGO_SAP': code, 'CORREO': email})
 
 
+class ERPResidents(BaseEntity):
+    _client = APIClient
+    _search_url = 'api_portal_clie/dame_residentes'
+    name = None
+    client_sap = None
+
+    def search(self):
+        client = self._client()
+        body = {"NOMBRE": self.name, "CLIENTE_SAP": self.client_sap} 
+        return client.post(self._search_url, body)
+
+
 class ERPAviso(BaseEntity):
     _client = APIClient
     _create_url = 'api_portal_clie/crear_aviso'

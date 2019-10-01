@@ -1,7 +1,7 @@
 import requests
 from mock import MagicMock
 from partenon.base import BaseEntity
-from partenon.ERP import ERPAviso, ERPClient
+from partenon.ERP import ERPAviso, ERPClient, ERPResidents
 
 
 def test_can_create_aviso():
@@ -87,6 +87,24 @@ def test_can_seach_client():
     assert(len(response) == 1)
     assert('codigo' in response[0])
     assert('nombre' in response[0])
+
+
+def test_can_seach_client_by_sap_code():
+    kwargs = dict(name='RUBEN DARIO TINEO MORONTA')
+    client = ERPResidents(**kwargs)
+
+    response = client.search()
+
+    assert(isinstance(response, list))
+    assert(len(response) == 1)
+
+    assert('codigo_sap' in response[0])
+    assert(2935 == response[0].get('codigo_sap'))
+
+    assert('nombre' in response[0])
+    assert(kwargs.get('name') == response[0].get('nombre'))
+
+    assert('cliente_sap' in response[0])
 
 
 def test_can_add_email_to_client():

@@ -1,4 +1,4 @@
-from .erp import ERPAviso, ERPClient
+from .erp import ERPAviso, ERPClient, ERPResidents
 
-__all__ = ['ERPAviso', 'ERPClient']
+__all__ = ['ERPAviso', 'ERPClient', 'ERPResidents']
 
