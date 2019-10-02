@@ -17,9 +17,9 @@ class ERPClient(BaseEntity):
 
     def info(self):
         client = self._client()
-        body = {"I_CLIENTE": self.client_number}  
+        body = {"I_CLIENTE": self.client_number}
         return client.post(self._info_url, body)
-    
+
     def search(self):
         client = self._client()
         return client.post(
@@ -31,11 +31,13 @@ class ERPClient(BaseEntity):
         return client.post(
             self._has_credit_url,
             {"I_CLIENTE": self.client_code})
-    
+
     def add_email(self, email):
         client = self._client()
         code = self.client_code if self.client_code else self.client_number
-        return client.post(self._add_email, {'CODIGO_SAP': code, 'CORREO': email})
+        return client.post(
+            self._add_email,
+            {'CODIGO_SAP': code, 'CORREO': email})
 
 
 class ERPResidents(BaseEntity):
@@ -46,15 +48,22 @@ class ERPResidents(BaseEntity):
 
     def search(self):
         client = self._client()
-        body = {"NOMBRE": self.name, "CLIENTE_SAP": self.client_sap} 
+        body = {"NOMBRE": self.name, "CLIENTE_SAP": self.client_sap}
         return client.post(self._search_url, body)
+
+    @staticmethod
+    def get_principal_email(email):
+        client = APIClient()
+        return client.post(
+            "api_portal_clie/get_mail_princ",
+            {'CORREO': email})
 
 
 class ERPAviso(BaseEntity):
     _client = APIClient
     _create_url = 'api_portal_clie/crear_aviso'
     _info_url = 'api_portal_clie/info_aviso'
-    _create_quotation_url = 'api_portal_clie/create_quotatio' 
+    _create_quotation_url = 'api_portal_clie/create_quotatio'
     _sap_customer = None
     aviso = None
 
@@ -64,18 +73,18 @@ class ERPAviso(BaseEntity):
             raise AttributeError('Not has atribute aviso')
 
         body = {
-            "I_AVISO" : self.aviso,
-            "I_IDIOMA" : 'S'}
+            "I_AVISO": self.aviso,
+            "I_IDIOMA": 'S'}
         client = self._client()
-        response = client.post(self._info_url, body) 
+        response = client.post(self._info_url, body)
         responsable = response.get('responsable')
         return BaseEntity(**responsable)
-    
+
     @property
     def client(self):
         if not hasattr(self, 'aviso'):
             raise AttributeError('Not has atribute aviso ni cliente')
-        
+
         if not self._sap_customer:
             self._sap_customer = self.info(self.aviso).get('cliente')
 
@@ -83,11 +92,11 @@ class ERPAviso(BaseEntity):
         return BaseEntity(**client.info())
 
     def create(
-        self, client_sap, text, text_larg,
-        service_name, email, type_service,
-        require_quotation=None):
+            self, client_sap, text, text_larg,
+            service_name, email, type_service,
+            require_quotation=None):
 
-        self._sap_customer = client_sap 
+        self._sap_customer = client_sap
         body = {
             "I_CLIENTE": client_sap,
             "I_TXT_CORTO": text,
@@ -100,20 +109,20 @@ class ERPAviso(BaseEntity):
         client = self._client()
         response = client.post(self._create_url, body)
         return ERPAviso(**response)
-    
+
     def info(self, aviso, language="S"):
         body = {
-            "I_AVISO" : aviso,
-            "I_IDIOMA" : language}
+            "I_AVISO": aviso,
+            "I_IDIOMA": language}
         client = self._client()
-        response = client.post(self._info_url, body) 
+        response = client.post(self._info_url, body)
         return response
-    
+
     @staticmethod
     def update(
-        aviso, status,
-        client=APIClient,
-        update_url='api_portal_clie/update_aviso'):
+            aviso, status,
+            client=APIClient,
+            update_url='api_portal_clie/update_aviso'):
 
         client = client()
         body = {
@@ -124,22 +133,22 @@ class ERPAviso(BaseEntity):
             return client.post(update_url, body)
         except NotFound:
             message = 'The %s warning does not have a created order.' % aviso
-            raise exceptions.NotHasOrder(message) 
-    
+            raise exceptions.NotHasOrder(message)
+
     @staticmethod
     def update_client(
-        aviso,
-        client_number,
-        api_client=APIClient,
-        api_url='api_portal_clie/upt_clien_aviso'):
+            aviso,
+            client_number,
+            api_client=APIClient,
+            api_url='api_portal_clie/upt_clien_aviso'):
 
-        body = {"AVISO" : aviso, "CLIENTE" : client_number}
+        body = {"AVISO": aviso, "CLIENTE": client_number}
         return api_client().post(api_url, body)
-    
+
     def create_quotation(self):
         if not hasattr(self, 'aviso'):
             raise AttributeError('Not has aviso set attribute')
-        
+
         client = self._client()
         body = {"I_AVISO": self.aviso, "I_IDIOMA": "S"}
         response = client.post(self._create_quotation_url, body)

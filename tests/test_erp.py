@@ -107,6 +107,17 @@ def test_can_seach_client_by_sap_code():
     assert('cliente_sap' in response[0])
 
 
+def test_can_seach_residente_principal_email():
+    email = 'miguel@correo.com'
+    response = ERPResidents.get_principal_email(email)
+
+    assert(isinstance(response, list))
+    assert(len(response) == 1)
+
+    assert('correo' in response[0])
+    assert(email == response[0].get('correo'))
+
+
 def test_can_add_email_to_client():
     kwargs = dict(client_code=4259)
     client = ERPClient(**kwargs)
