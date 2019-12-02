@@ -133,3 +133,11 @@ def test_can_check_client_has_credit():
     assert(isinstance(response, object))
     assert(len(response) == 1)
     assert('puede_consumir' in response)
+
+
+def test_can_search_invoices():
+    kwargs = dict(client_code=4635)
+    client = ERPClient(**kwargs)
+
+    invoices = client.invoices(merchant='349052692')
+    assert isinstance(invoices, list)

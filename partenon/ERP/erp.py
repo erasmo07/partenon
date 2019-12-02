@@ -11,9 +11,14 @@ class ERPClient(BaseEntity):
     _search_url = 'api_portal_clie/dame_clientes'
     _has_credit_url = 'api_portal_clie/clie_bad_credit'
     _add_email = 'api_portal_clie/add_mail_resid'
+    _invoices_url = 'api_portal_clie/dame_fact_pendi'
     client_number = None
     client_name = None
     client_code = None
+
+    @property
+    def code(self):
+        return self.client_code if self.client_code else self.client_number
 
     def info(self):
         client = self._client()
@@ -24,20 +29,30 @@ class ERPClient(BaseEntity):
         client = self._client()
         return client.post(
             self._search_url,
-            {"CODIGO": self.client_code, "NOMBRE": self.client_name})
+            {"CODIGO": self.code, "NOMBRE": self.client_name})
 
     def has_credit(self):
         client = self._client()
         return client.post(
             self._has_credit_url,
-            {"I_CLIENTE": self.client_code})
+            {"I_CLIENTE": self.code})
 
     def add_email(self, email):
         client = self._client()
-        code = self.client_code if self.client_code else self.client_number
         return client.post(
             self._add_email,
-            {'CODIGO_SAP': code, 'CORREO': email})
+            {'CODIGO_SAP': self.code, 'CORREO': email})
+    
+    def invoices(self, merchant='', language='ES'):
+        invoices = self._client().post(
+            self._invoices_url,
+            {
+                'I_CLIENTE': self.code,
+                'I_IDIOMA': language,
+                'I_MERCHANTNR': merchant
+            }
+        )
+        return [BaseEntity(**invoice) for invoice in invoices]
 
 
 class ERPResidents(BaseEntity):
