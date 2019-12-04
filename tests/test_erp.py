@@ -141,3 +141,14 @@ def test_can_search_invoices():
 
     invoices = client.invoices(merchant='349052692')
     assert isinstance(invoices, list)
+
+
+def test_can_search_invoice_pdf():
+    kwargs = dict(client_code=4635)
+    client = ERPClient(**kwargs)
+
+    invoice_pdf = client.invoice_pdf(
+        document_number='900191818')
+
+    assert hasattr(invoice_pdf, 'data')
+    assert hasattr(invoice_pdf, 'success')

@@ -12,6 +12,7 @@ class ERPClient(BaseEntity):
     _has_credit_url = 'api_portal_clie/clie_bad_credit'
     _add_email = 'api_portal_clie/add_mail_resid'
     _invoices_url = 'api_portal_clie/dame_fact_pendi'
+    _invoice_binary_url = 'api_portal_clie/dame_fact_pdf'
     client_number = None
     client_name = None
     client_code = None
@@ -53,6 +54,17 @@ class ERPClient(BaseEntity):
             }
         )
         return [BaseEntity(**invoice) for invoice in invoices]
+    
+    def invoice_pdf(self, document_number, language=''):
+        invoice_binary = self._client().post(
+            self._invoice_binary_url,
+            {
+                "I_CLIENTE" : self.code,
+                "I_IDIOMA" : language,
+                "I_DOCUMENT_NUMBER" : document_number
+            }
+        )
+        return BaseEntity(**invoice_binary)
 
 
 class ERPResidents(BaseEntity):
