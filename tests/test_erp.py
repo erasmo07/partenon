@@ -58,7 +58,7 @@ def test_can_update_aviso_real():
 
     aviso = erp_aviso.create(**kwargs)
     assert(hasattr(aviso, 'aviso'))
-    
+
     client = MagicMock()
     client.post.return_value = {}
     kwargs = dict(
@@ -111,11 +111,8 @@ def test_can_seach_residente_principal_email():
     email = 'miguel@correo.com'
     response = ERPResidents.get_principal_email(email)
 
-    assert(isinstance(response, list))
-    assert(len(response) == 1)
-
-    assert('correo' in response[0])
-    assert(email == response[0].get('correo'))
+    assert(isinstance(response, dict))
+    assert('correo' in response)
 
 
 def test_can_add_email_to_client():
@@ -152,3 +149,21 @@ def test_can_search_invoice_pdf():
 
     assert hasattr(invoice_pdf, 'data')
     assert hasattr(invoice_pdf, 'success')
+
+
+def test_can_list_advance_payment():
+    kwargs = dict(client_code=4635)
+    client = ERPClient(**kwargs)
+
+    advance_payments = client.advance_payment(
+        merchant='349052692', language='E')
+
+    assert isinstance(advance_payments, list)
+
+    for entity in advance_payments:
+        assert hasattr(entity, 'bukrs')
+        assert hasattr(entity, 'description')
+        assert hasattr(entity, 'status')
+        assert hasattr(entity, 'id')
+        assert hasattr(entity, 'concept_id')
+        assert hasattr(entity, 'spras')
