@@ -66,7 +66,9 @@ class Transaction:
                 "Expiration": self.card.expiration
             })
         else:
-            data.update({"DataVaultToken": self.card.token})
+            data.update({
+                "DataVaultToken": self.card.token,
+                "CardNumber": '', "Expiration": '' })
         return data
 
     def get_default_keys(self):
