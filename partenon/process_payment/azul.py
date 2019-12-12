@@ -57,7 +57,9 @@ class Transaction:
     def get_data(self):
         data = dict()
         data.update(self.get_default_keys())
-        data['SaveToDataVault'] = self.save_to_data_vault if self.save_to_data_vault else ''
+
+        if self.save_to_data_vault:
+            data['SaveToDataVault'] = self.save_to_data_vault
 
         if self.card.token is None:
             data.update({
@@ -73,14 +75,19 @@ class Transaction:
 
     def get_default_keys(self):
         return {
-            'AcquirerRefData': '1', 'Channel': self._channel,
+            'AcquirerRefData': '1',
+            'Amount': self.amount,
+            'Channel': self._channel,
             'CurrencyPosCode': self._currency_post_code,
             'CustomerServicePhone': self._customer_service_phone,
             'ECommerceURL': self._ecommerce_url,
-            'OrderNumber': self.order_number, 'Payments': '1', 'Plan': '0',
-            'PosInputMode': self._pos_inpu_mode, 'Store': self._store,
-            'TrxType': self.type_transaction, 'Amount': self.amount,
-            'ITBIS': self.itbis
+            'ITBIS': self.itbis,
+            'OrderNumber': self.order_number,
+            'Payments': '1',
+            'Plan': '0',
+            'PosInputMode': self._pos_inpu_mode,
+            'Store': self._store,
+            'TrxType': self.type_transaction,
         }
 
     def commit(self):
