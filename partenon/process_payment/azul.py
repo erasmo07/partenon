@@ -75,6 +75,7 @@ class Transaction:
 
     def get_default_keys(self):
         return {
+            'ECommerceURL': 'https://app.puntacana.com',
             'AcquirerRefData': '1',
             'Amount': self.amount,
             'Channel': self._channel,
