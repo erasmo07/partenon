@@ -27,7 +27,7 @@ class Deparments(object):
 class Status(base.BaseManageEntity):
     _url = 'api/v1/helpdesk/dependency'
     _entity = entitys.State
-    _client = faveo.APIClient()
+    _client = faveo.APIClient
 
     @staticmethod
     def get_entitys(
