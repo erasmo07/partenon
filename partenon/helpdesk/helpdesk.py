@@ -73,6 +73,7 @@ class HelpDeskTicket(
     _url_to_change_status = 'api/v2/helpdesk/status/change'
     _url_to_add_note = 'api/v1/helpdesk/internal-note'
     ticket_name = None
+    ticket_id = None
 
     @property
     def state(self):
@@ -91,7 +92,8 @@ class HelpDeskTicket(
     def get_specific_ticket(
         ticket_id,
         url='api/v1/helpdesk/ticket',
-        client=faveo.APIClient()):
+        client=faveo.APIClient):
+        client = client()
         response = client.get(url, params=dict(id=ticket_id))
         ticket_detail = response.get('data').get('ticket')
         ticket_detail['ticket_id'] = ticket_detail['id']
