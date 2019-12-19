@@ -10,10 +10,11 @@ def convert(name):
 
 class TransactionResponse:
     response_code = None
-    error_decription = None
+    error_description = None
     data_vault_token = None
     data_vault_expiration = None
     data_vault_brand = None
+    iso_code = None
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
@@ -21,7 +22,7 @@ class TransactionResponse:
             self.__dict__.update({convert(key): value})
 
     def is_valid(self):
-        return False if self.response_code == 'Error' else True
+        return False if not self.iso_code == '00' else True
 
 
 class Transaction:
