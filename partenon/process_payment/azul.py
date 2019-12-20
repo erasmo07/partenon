@@ -3,6 +3,14 @@ import re
 from oraculo.gods.azul import APIClient
 
 
+class NotSetToken(Exception):
+    pass
+
+
+class CantDeleteCard(Exception):
+    pass
+
+
 def convert(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
@@ -42,16 +50,16 @@ class Transaction:
     def __init__(
             self, card,
             amount,
-            itbis=None,
+            itbis='',
             type_transaction='Sale',
-            order_number=None,
+            order_number="",
             merchan_name=None,
             save_to_data_vault=None):
         self.amount = amount
         self.card = card
-        self.itbis = itbis if itbis else ''
+        self.itbis = itbis
         self.merchan_name = merchan_name if merchan_name else self.merchan_name
-        self.order_number = order_number if order_number else ""
+        self.order_number = order_number
         self.save_to_data_vault = save_to_data_vault
         self.type_transaction = type_transaction
 
@@ -71,12 +79,13 @@ class Transaction:
         else:
             data.update({
                 "DataVaultToken": self.card.token,
-                "CardNumber": '', "Expiration": '' })
+                "CardNumber": '', "Expiration": ''})
         return data
 
     def get_default_keys(self):
         return {
-            'ECommerceURL': 'https://app.puntacana.com',
+            'ECommerceURL': self._ecommerce_url,
+            'AltMerchantName': self.merchan_name,
             'AcquirerRefData': '1',
             'Amount': self.amount,
             'Channel': self._channel,
@@ -112,7 +121,7 @@ class Card:
         self.number = number
         self.expiration = expiration
         self.cvc = cvc
-    
+
     def is_valid(self):
         return self._is_valid
 
@@ -132,3 +141,21 @@ class Card:
             self.token_expiration = transaction.data_vault_expiration
             self.brand = transaction.data_vault_brand
             return (self.token, self.token_expiration, self.brand)
+
+    def delete(self):
+        if not self.token:
+            raise NotSetToken('This card not has token')
+
+        transaction = self.transaction_class(
+            self,
+            amount='',
+            type_transaction="DELETE",
+        )
+
+        transaction._url = '/webservices/json/default.aspx?ProcessDatavault'
+        transaction_response = transaction.commit()
+
+        if not transaction_response.is_valid():
+            raise CantDeleteCard(transaction_response.error_description)
+
+        return transaction_response
