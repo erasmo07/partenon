@@ -64,7 +64,7 @@ class HelpDeskTicket(
         base.BaseEntityHelpDesk,
         base.BaseHelpDesk):
     _user = None
-    _client = faveo.APIClient()
+    _client = faveo.APIClient
     _status_close_name = 'Closed'
     _department = os.environ.get('PARTENON_DEPARTMENT')
     _create_url = 'api/v1/helpdesk/create'
@@ -78,10 +78,14 @@ class HelpDeskTicket(
     @property
     def state(self):
         if not self.ticket_name:
-            response = self._client.get(
+            response = self._client().get(
                 self._url_detail, params=dict(id=self.ticket_id))
-            ticket = response.get('data').get('ticket')
-            self.ticket_name = ticket.get('status_name')
+
+            self.ticket_name = response.get(
+                'data', {}
+            ).get(
+                'ticket', {}
+            ).get('status_name', '')
         return Status.get_state_by_name(self.ticket_name)
     
     @property
@@ -89,20 +93,23 @@ class HelpDeskTicket(
         return self._user
     
     @staticmethod
-    def get_specific_ticket(
-        ticket_id,
-        url='api/v1/helpdesk/ticket',
-        client=faveo.APIClient):
-        client = client()
-        response = client.get(url, params=dict(id=ticket_id))
+    def get_specific_ticket(ticket_id):
+
+        response = faveo.APIClient().get(
+            'api/v1/helpdesk/ticket',
+            params=dict(id=ticket_id))
+
         ticket_detail = response.get('data').get('ticket')
         ticket_detail['ticket_id'] = ticket_detail['id']
-        user = HelpDeskUser(**ticket_detail.get('from'))
-        return HelpDeskTicket(_user=user, **ticket_detail)
+
+        return HelpDeskTicket(
+            _user=HelpDeskUser(**ticket_detail.get('from')),
+            **ticket_detail)
 
     def add_note(self, note, user):
         body = dict(ticket_id=self.ticket_id, user_id=user.id, body=note)
-        response = self._client.post(self._url_to_add_note, body=body)
+
+        response = self._client().post(self._url_to_add_note, body=body)
         return response
 
     def create(self, subject, body, priority, topic, department):
@@ -120,7 +127,7 @@ class HelpDeskTicket(
             email=self._user.email, priority=priority.priority_id,
             help_topic=topic.id, dept=department.id)
 
-        response = self._client.post(self._create_url, body).get('response')
+        response = self._client().post(self._create_url, body).get('response')
         return self.get_specific_ticket(response.get('ticket_id'))
 
     def list(self):
@@ -128,7 +135,7 @@ class HelpDeskTicket(
             raise NotSetHelpDeskUserInstance('Need set _user instance')
 
         params = dict(user_id=self._user.id)
-        response = self._client.get(self._list_url, params)
+        response = self._client().get(self._list_url, params)
 
         if not isinstance(response, dict) and response.get('tickets', None):
             raise NotIsInstance(response.get('error'))
@@ -137,13 +144,15 @@ class HelpDeskTicket(
 
     def change_state(self, state):
         body = dict(ticket_id=self.ticket_id, status_id=state.id)
-        response = self._client.post(self._url_to_change_status, body)
+
+        response = self._client().post(self._url_to_change_status, body)
         return response.get('success')
 
     def close(self):
         state_close = Status.get_state_by_name(self._status_close_name)
         body = dict(ticket_id=self.ticket_id, status_id=state_close.id)
-        response = self._client.post(self._url_to_change_status, body)
+
+        response = self._client().post(self._url_to_change_status, body)
         return response.get('success')
     
 
