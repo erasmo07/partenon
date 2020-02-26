@@ -41,7 +41,7 @@ class Transaction:
     _store = os.environ.get('AZUL_STORE')
     _channel = os.environ.get('AZUL_CHANNEL')
     _pos_inpu_mode = os.environ.get('AZUL_POSINPUMODE', "E-Commerce")
-    merchan_name = os.environ.get("AZUL_MERCHAN_NAME")
+    _merchan_name = os.environ.get("AZUL_MERCHAN_NAME")
     amount = None
     api_client = APIClient
     card = None
@@ -54,11 +54,13 @@ class Transaction:
             type_transaction='Sale',
             order_number="",
             merchan_name=None,
+            store=None,
             save_to_data_vault=None):
         self.amount = amount
         self.card = card
         self.itbis = itbis
-        self.merchan_name = merchan_name if merchan_name else self.merchan_name
+        self.merchan_name = merchan_name if merchan_name else self._merchan_name
+        self.store = store if store else self._store
         self.order_number = order_number
         self.save_to_data_vault = save_to_data_vault
         self.type_transaction = type_transaction
@@ -94,10 +96,9 @@ class Transaction:
             'ECommerceURL': self._ecommerce_url,
             'ITBIS': self.itbis,
             'OrderNumber': self.order_number,
-            'Payments': '1',
-            'Plan': '0',
+            'Payments': '1', 'Plan': '0',
             'PosInputMode': self._pos_inpu_mode,
-            'Store': self._store,
+            'Store': self.store,
             'TrxType': self.type_transaction,
         }
 
