@@ -103,7 +103,9 @@ class Transaction:
         }
 
     def commit(self):
-        response = self.api_client().post(self._url, self.get_data())
+        response = self.api_client(
+            store=self.store
+        ).post(self._url, self.get_data())
         return TransactionResponse(**response)
 
 
@@ -143,13 +145,14 @@ class Card:
             self.brand = transaction.data_vault_brand
             return (self.token, self.token_expiration, self.brand)
 
-    def delete(self):
+    def delete(self, store=None):
         if not self.token:
             raise NotSetToken('This card not has token')
 
         transaction = self.transaction_class(
             self,
             amount='',
+            store=store,
             type_transaction="DELETE",
         )
 
@@ -157,6 +160,7 @@ class Card:
         transaction_response = transaction.commit()
 
         if not transaction_response.is_valid():
-            raise CantDeleteCard(transaction_response.error_description)
+            raise CantDeleteCard(
+                message=transaction_response.error_description)
 
         return transaction_response
