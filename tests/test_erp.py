@@ -145,7 +145,8 @@ def test_can_search_invoice_pdf():
     client = ERPClient(**kwargs)
 
     invoice_pdf = client.invoice_pdf(
-        document_number='900191818')
+        document_number='900191818',
+        merchant='349052692')
 
     assert hasattr(invoice_pdf, 'data')
     assert hasattr(invoice_pdf, 'success')

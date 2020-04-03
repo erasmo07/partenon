@@ -56,13 +56,14 @@ class ERPClient(BaseEntity):
         )
         return [BaseEntity(**invoice) for invoice in invoices]
 
-    def invoice_pdf(self, document_number, language=''):
+    def invoice_pdf(self, document_number, merchant, language=''):
         invoice_binary = self._client().post(
             self._invoice_binary_url,
             {
                 "I_CLIENTE": self.code,
                 "I_IDIOMA": language,
-                "I_DOCUMENT_NUMBER": document_number
+                "I_DOCUMENT_NUMBER": document_number,
+                "I_MERCHANTNR": merchant
             }
         )
         return BaseEntity(**invoice_binary)
